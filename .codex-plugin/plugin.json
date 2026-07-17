@@ -1,7 +1,7 @@
 {
   "name": "ai-intel-workbench",
   "version": "0.1.2",
-  "description": "Local daily AI intelligence workbench with configurable sources, X-first KOL tracking, industry anchors, output language, static HTML dashboard, optional push bots, and scheduled runs.",
+  "description": "Daily China policy and technology intelligence workbench with traceability, sector impact analysis, archives, alerts, and a shareable single-file offline dashboard.",
   "repository": "https://github.com/weishao831/ai-intel-workbench",
   "homepage": "https://github.com/weishao831/ai-intel-workbench",
   "author": {
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "AI Intel Workbench",
-    "shortDescription": "Run a local multilingual daily AI intelligence dashboard and digest workflow.",
-    "longDescription": "A local-first daily intelligence workbench for AI practitioners. Use natural-language prompts or scripts to configure industry anchors, output language, sources, X/Twitter collection providers, optional Gate-News X aggregation, push bots, and agent-native or local scheduled runs; generate structured daily digests and view them in a zero-dependency HTML dashboard.",
+    "shortDescription": "Track China policy and AI/software industry signals every day.",
+    "longDescription": "A local-first China policy and technology intelligence workbench. Trace policies to official originals, capture effective dates and affected industries, explain track-level impact, highlight watchwords, archive weekly/monthly knowledge, alert failures in Feishu, and update a zero-dependency HTML dashboard.",
     "developerName": "Wesber",
     "category": "Productivity",
     "capabilities": [
@@ -34,6 +34,7 @@
       "Set up AI Intel Workbench for AI + finance, English output, and schedule your daily run",
       "生成今天的 AI 情报 digest",
       "帮我安装每日定时任务"
+      ,"追踪全国最新政策和时事，分析对自动驾驶、智能体和大模型的影响"
     ],
     "brandColor": "#4F46E5"
   }

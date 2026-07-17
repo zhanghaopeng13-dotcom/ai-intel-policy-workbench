@@ -1,0 +1,4 @@
+interface:
+  display_name: "中国产业政策情报台"
+  short_description: "每日追踪政策、时事与 AI/软件产业影响"
+  default_prompt: "使用 $daily-intelligence-workbench 抓取今天最新的全国及各地政策与产业时事，更新看板，并生成可直接发送给别人打开的单文件 HTML 分享版。"

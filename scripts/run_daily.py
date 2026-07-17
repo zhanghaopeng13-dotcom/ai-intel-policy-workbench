@@ -32,11 +32,11 @@ from common import (
 
 
 DEFAULT_DIMENSIONS = [
-    {"key": "lab", "cn": "AI 大厂动态"},
-    {"key": "kol", "cn": "KOL 观点"},
-    {"key": "paper", "cn": "前沿论文"},
-    {"key": "oss", "cn": "开源项目"},
-    {"key": "fin", "cn": "AI × 金融"},
+    {"key": "lab", "cn": "AI 与大模型"},
+    {"key": "kol", "cn": "智能体与软件"},
+    {"key": "paper", "cn": "自动驾驶"},
+    {"key": "oss", "cn": "数据要素与安全"},
+    {"key": "fin", "cn": "互联网与数字产业"},
 ]
 LANGUAGE_INSTRUCTIONS = {
     "zh": "最终 digest 的标题、摘要、详细解释、热点、维度概览与 practice_list 使用简体中文；技术术语、公司名、项目名、URL 保留原文。",
@@ -87,6 +87,8 @@ def write_digest_from_json(date_value, json_path, language_override=None):
     if language not in LANGUAGE_INSTRUCTIONS:
         language = "zh"
     payload = load_json(json_path)
+    from enrich_policy import enrich
+    payload = enrich(payload)
     payload.setdefault("date", date_iso)
     payload.setdefault("language", language)
     payload.setdefault("date_cn", date_label(date_iso))
@@ -198,17 +200,20 @@ def create_research_prompt(date_value, language_override=None):
 
 执行要求：
 
-1. 读取 `config/industry.yaml`、`config/sources.yaml`、`config/keywords.yaml`、`config/kol.yaml`、`config/research_radar.yaml`。
-2. 先执行 `config/research_radar.yaml` 的高优先级雷达，再做普通五维度搜索。雷达必须覆盖：
+1. 读取 `config/industry.yaml`、`config/sources.yaml`、`config/keywords.yaml`、`config/kol.yaml`、`config/research_radar.yaml`、`config/policy.yaml`、`config/watchwords.yaml`。
+2. 先执行政策雷达，再按五个产业板块搜索；`config/research_radar.yaml` 仅作为技术热点补充，不决定看板分类。补充雷达可覆盖：
    - 研究员长文 / X Articles：尤其 Anthropic Claude Code、OpenAI/alignment 研究员；
    - 官方研究页：Anthropic Research、OpenAI Research、OpenAI Alignment、Google DeepMind Research；
    - 国产前沿实验室：DeepSeek、Kimi/Moonshot、Z.ai/GLM、Qwen；检查 official page、Hugging Face model card、GitHub technical report；
    - 开源金融/量化 Agent：从 X 讨论 + GitHub topics 双入口发现，不只看 stars。
-3. 按五维度调研：AI 大厂动态、KOL 观点、前沿论文、开源项目、AI × 金融。研究雷达发现可进入任一维度。
-4. KOL 观点维度必须执行 X-first 流程：先从 `config/kol.yaml` 取重点 handle，用 `site:x.com/<handle>/status`、`site:x.com/<handle>/article`、公开 X status/profile/article、已配置的 Gate-News `news_feed_search_x` / X API / 本机 provider 发现近 7 天帖子；目标是 KOL 维度至少 60% 条目来自 X status/profile/article 或带 `x_src` 的 X 证据。若达不到，必须在 `dimensions[].notes` 写明 provider 限制和 fallback 来源。
-5. 优先英文关键词与一手来源；X/Twitter 只用可访问的公开 status/profile/article 或用户本地显式配置的 provider，不读取 cookie/token。
+3. 看板严格按五个板块分类：`lab=AI 与大模型`、`kol=智能体与软件`、`paper=自动驾驶`、`oss=数据要素与安全`、`fin=互联网与数字产业`。不得再把“大厂、KOL、论文、开源、金融”作为五大维度。每天目标 15–25 条，原则上每板块不少于 3 条；确无高信号内容时宁缺毋滥，并在板块 overview 说明。
+4. 政策项必须回溯发布机关原文，设置 `content_type=policy`，并填写 `policy.original_url`、`policy.issuer`、`policy.region`、`policy.published_date`、`policy.effective_date`（无明确日期写“待明确”）、`policy.affected_industries`；中央政策 region 写“全国”，地方政策写省级或计划单列市简称。不得用转载链接冒充原文。
+5. 每日轮询 `config/policy.yaml` 的 `local_government_portals`，优先收录当天和近7天新发布的地方政策。每条地方政策必须来自地方政府或主管部门官网；媒体转载只可用于发现。地方政策仍按实际影响归入五个产业板块，同时由“各地最新政策”视图聚合展示。
+6. 每条补充 `impact_sentiment`（利好/利空/中性）与 `impact_summary`，用一句具体的话回答“对哪个赛道意味着什么”，避免泛泛而谈。命中 `config/watchwords.yaml` 的候选项提高优先级。
+6. 技术和行业热点可使用企业官网、研究机构、GitHub、公开 X 页面与权威媒体，但它们必须归入对应产业板块；不单设 KOL 或论文板块，也不设置 X 来源配额。
+7. 全国政策优先中文官方来源；技术与国际趋势优先英文一手来源。X/Twitter 只用可访问的公开页面或用户显式配置的 provider，不读取 cookie/token。
 6. 对 DeepSeek、Kimi/Moonshot、智谱/Z.ai、Qwen 的文章、论文、模型卡、GitHub release 提升优先级；即使它们不是当天最大舆论，也要纳入候选池并给出是否入选的判断。
-7. 开源项目额外关注金融 Agent、量化 Agent、AI 投研、回测/券商/交易所接口、自动推送、风控闭环；星少但机制新、X 讨论早期升温的项目可标 `potential=潜力新星`。
+7. 开源项目按实际用途归类：模型与推理进入 AI 与大模型，Agent 框架和企业软件进入智能体与软件，车载项目进入自动驾驶，数据工具进入数据要素与安全，平台基础设施进入互联网与数字产业。
 8. 过滤营销、招聘、重复与不可验证信息；保留来源 URL、日期和可信度说明。不要因为高价值研究员长文暂时不够病毒传播就直接丢弃。
 9. 长文/研究项写作规则：若 `content_type` 是 `x_article`、`official_research`、`paper`、`technical_report`、`model_card`，通常设置 `depth=deep`，`detail` 至少约 650 个中文字符，并补充 `key_points`、`examples`、`product_implications`、`limitations`。目标是用户不跳原文也能了解七七八八。
 10. 按“产出语言”要求组织 `title`、`summary`、`detail`、`why`、`buzz`、`dimensions.overview`、`hot_topics_today.summary`、`practice_list` 等面向用户字段。
@@ -282,6 +287,9 @@ def main():
 
     if digest_path_for(date_iso).exists():
         rc = subprocess.call([sys.executable, "scripts/validate_digest.py", "--date", date_iso], cwd=str(ROOT))
+        if rc != 0:
+            sys.exit(rc)
+        rc = subprocess.call([sys.executable, "scripts/build_single_html.py", "--date", date_iso], cwd=str(ROOT))
         if rc != 0:
             sys.exit(rc)
         if args.push:

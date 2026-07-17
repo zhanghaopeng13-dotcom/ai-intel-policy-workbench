@@ -1,0 +1,50 @@
+# 中国软件与互联网产业政策雷达
+meta:
+  version: 1
+  updated: 2026-07-17
+
+regions: [全国, 北京, 上海, 广东, 深圳, 浙江, 江苏, 四川, 湖北, 安徽]
+
+sectors:
+  - { key: artificial-intelligence, cn: 人工智能, keywords: [人工智能, 算力, 算法备案, 生成式人工智能] }
+  - { key: autonomous-driving, cn: 自动驾驶, keywords: [自动驾驶, 智能网联汽车, L3, 准入, 车路云一体化] }
+  - { key: agents, cn: 智能体, keywords: [智能体, AI Agent, 多智能体, 工具调用] }
+  - { key: foundation-models, cn: 大模型, keywords: [大模型, 基础模型, 生成式人工智能, 模型备案, MoE] }
+  - { key: data, cn: 数据与隐私, keywords: [数据要素, 数据出境, 个人信息, 数据标注, 语料] }
+  - { key: cloud-software, cn: 软件与云计算, keywords: [软件产业, 云计算, 信创, 开源, SaaS] }
+  - { key: internet-platforms, cn: 互联网平台, keywords: [平台经济, 算法推荐, 网络安全, 内容治理] }
+
+# 政策必须优先取发布机关原文；媒体稿只用于发现与交叉验证。
+official_sources:
+  - { name: 中国政府网, url: https://www.gov.cn/zhengce/ }
+  - { name: 国务院政策文件库, url: https://sousuo.www.gov.cn/zcwjk/policyDocumentLibrary }
+  - { name: 工业和信息化部, url: https://www.miit.gov.cn/zwgk/zcwj/index.html }
+  - { name: 国家互联网信息办公室, url: https://www.cac.gov.cn/ }
+  - { name: 国家发展和改革委员会, url: https://www.ndrc.gov.cn/xxgk/zcfb/ }
+  - { name: 科学技术部, url: https://www.most.gov.cn/xxgk/xinxifenlei/fdzdgknr/fgzc/ }
+  - { name: 国家数据局, url: https://www.nda.gov.cn/sjj/zwgk/zcwj/A0903index_1.htm }
+  - { name: 公安部, url: https://www.mps.gov.cn/n2254314/n2254409/ }
+  - { name: 交通运输部, url: https://xxgk.mot.gov.cn/2020/jigou/fgs/zhengcewenjian/ }
+  - { name: 国家市场监督管理总局, url: https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/fgs/ }
+
+# 地方政策发现入口；每日按 regions 轮询政府门户和经信、数据、网信等主管部门。
+local_government_portals:
+  - { region: 北京, url: https://www.beijing.gov.cn/zhengce/ }
+  - { region: 上海, url: https://www.shanghai.gov.cn/nw12344/ }
+  - { region: 广东, url: https://www.gd.gov.cn/zwgk/wjk/ }
+  - { region: 深圳, url: https://www.sz.gov.cn/cn/xxgk/zfxxgj/ }
+  - { region: 浙江, url: https://www.zj.gov.cn/col/col1229017138/ }
+  - { region: 江苏, url: https://www.jiangsu.gov.cn/col/col46143/ }
+  - { region: 四川, url: https://www.sc.gov.cn/10462/c103043/zcwj.shtml }
+  - { region: 湖北, url: https://www.hubei.gov.cn/zfwj/ }
+  - { region: 安徽, url: https://www.ah.gov.cn/public/column/1681 }
+
+policy_requirements:
+  require_original_url: true
+  require_issuer: true
+  require_region: true
+  require_published_date: true
+  require_effective_date: true
+  require_affected_industries: true
+  allowed_sentiments: [利好, 利空, 中性]
+  unknown_effective_date_value: 待明确

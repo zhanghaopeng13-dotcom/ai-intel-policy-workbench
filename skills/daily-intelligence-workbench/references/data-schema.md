@@ -58,6 +58,17 @@ The deterministic writer also accepts canonical JSON:
       "buzz": "Community discussion",
       "x_src": ["https://x.com/.../status/..."],
       "content_type": "news | x_status | x_article | official_research | paper | technical_report | model_card | github_repo | analysis",
+      "policy": {
+        "original_url": "https://official.gov.cn/policy",
+        "issuer": "政策发布机关",
+        "region": "全国 | 北京 | 上海 | 广东 | 深圳 | ...",
+        "published_date": "2026-07-17",
+        "effective_date": "2026-08-01 | 待明确",
+        "affected_industries": ["自动驾驶", "数据服务"]
+      },
+      "impact_sentiment": "利好 | 利空 | 中性",
+      "impact_summary": "对自动驾驶意味着 L3 准入的合规与测试门槛抬高。",
+      "watchword_hits": ["L3 准入"],
       "depth": "normal | deep",
       "key_points": ["Point 1", "Point 2"],
       "examples": ["Concrete example"],
@@ -77,6 +88,8 @@ The deterministic writer also accepts canonical JSON:
 - Dimension: `key`, `cn`, `overview`
 - Hot topic: `title`, `summary`, `related`
 - Item: `id`, `dim`, `title`, `source`, `url`, `date`, `summary`, `detail`
+
+Policy items set `content_type: policy` and additionally require `policy.original_url`, `policy.issuer`, `policy.region`, `policy.published_date`, `policy.effective_date`, `policy.affected_industries`, `impact_sentiment`, and `impact_summary`. Use `全国` for central policies and the province or city short name for local policies. Never substitute a media repost for `original_url`.
 
 ## Longform / Research Item Expectations
 

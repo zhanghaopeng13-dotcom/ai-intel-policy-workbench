@@ -1,0 +1,41 @@
+name: Daily policy intelligence
+
+on:
+  schedule:
+    # GitHub Actions uses UTC: 00:30 UTC = 08:30 China Standard Time.
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-policy-intelligence
+  cancel-in-progress: false
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    env:
+      DAILY_INTEL_AGENT_CMD: ${{ secrets.DAILY_INTEL_AGENT_CMD }}
+      DAILY_INTEL_LARK_WEBHOOK: ${{ secrets.DAILY_INTEL_LARK_WEBHOOK }}
+      DAILY_INTEL_ALERT_WEBHOOK: ${{ secrets.DAILY_INTEL_ALERT_WEBHOOK }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate and validate today's intelligence
+        run: python scripts/run_daily.py --date today --strict
+      - name: Verify single-file share dashboard
+        run: python scripts/build_single_html.py --date today
+      - name: Commit dashboard data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ share/ai-intel-dashboard-latest.html
+          git diff --cached --quiet || git commit -m "data: update daily policy intelligence"
+          git push
+      - name: Alert Feishu on failure
+        if: failure()
+        run: python scripts/notify_failure.py --detail "每日政策与时事情报生成、校验或提交失败。"

@@ -1,0 +1,45 @@
+name: Archive intelligence knowledge base
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"
+    - cron: "15 1 1 * *"
+  workflow_dispatch:
+    inputs:
+      period:
+        description: Archive period
+        type: choice
+        options: [week, month]
+        default: month
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    env:
+      DAILY_INTEL_ALERT_WEBHOOK: ${{ secrets.DAILY_INTEL_ALERT_WEBHOOK }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build archive
+        shell: bash
+        run: |
+          period="${{ inputs.period }}"
+          if [ -z "$period" ]; then
+            if [ "$(date -u +%d)" = "01" ]; then period=month; else period=week; fi
+          fi
+          python scripts/archive_knowledge.py --period "$period"
+      - name: Commit Obsidian-compatible Markdown
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add knowledge-base/
+          git diff --cached --quiet || git commit -m "docs: archive policy intelligence"
+          git push
+      - name: Alert Feishu on failure
+        if: failure()
+        run: python scripts/notify_failure.py --detail "周/月产业情报知识库归档失败。"

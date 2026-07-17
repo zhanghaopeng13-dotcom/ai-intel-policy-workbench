@@ -91,7 +91,23 @@ def validate_digest(date_value):
     if len(urls) < max(1, len(item_ids) // 2):
         warnings.append("URL 数量偏少：%d urls / %d items" % (len(urls), len(item_ids)))
     if payload:
-        kol_items = [item for item in payload.get("items", []) if item.get("dim") == "kol"]
+        policy_items = [
+            item for item in payload.get("items", [])
+            if item.get("content_type") == "policy" or item.get("policy")
+        ]
+        for item in policy_items:
+            policy = item.get("policy") or {}
+            missing = [key for key in ("original_url", "issuer", "region", "published_date", "effective_date", "affected_industries") if not policy.get(key)]
+            if missing:
+                errors.append("政策条目 %s 缺少字段：%s" % (item.get("id", "(no-id)"), ", ".join(missing)))
+            if item.get("impact_sentiment") not in ("利好", "利空", "中性"):
+                errors.append("政策条目 %s impact_sentiment 必须为利好/利空/中性" % item.get("id", "(no-id)"))
+            if not item.get("impact_summary"):
+                errors.append("政策条目 %s 缺少 impact_summary" % item.get("id", "(no-id)"))
+        print("[validate] policy_items=%d" % len(policy_items))
+
+        policy_mode = len(policy_items) >= max(1, len(payload.get("items", [])) // 3)
+        kol_items = [] if policy_mode else [item for item in payload.get("items", []) if item.get("dim") == "kol"]
         x_kol = [
             item for item in kol_items
             if "x.com/" in (item.get("url", "") + " " + " ".join(item.get("x_src") or []))
@@ -122,11 +138,11 @@ def validate_digest(date_value):
             or any(domain in (item.get("url", "") + " " + " ".join(item.get("x_src") or [])) for domain in RESEARCH_DOMAINS)
         ]
         print("[validate] research_radar_hits=%d" % len(radar_hits))
-        if not radar_hits:
+        if not radar_hits and not policy_mode:
             warnings.append("未发现研究雷达命中项：请确认已扫描 config/research_radar.yaml（研究员长文/官方研究页/国产模型论文）")
 
         anchors = active_industry_anchors()
-        if "ai-finance" in anchors or "ai-crypto" in anchors:
+        if ("ai-finance" in anchors or "ai-crypto" in anchors) and not policy_mode:
             finance_oss = []
             for item in payload.get("items", []):
                 if item.get("dim") != "oss":
